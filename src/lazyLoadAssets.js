@@ -11,7 +11,7 @@ import activateOnScroll from './activateOnScroll';
  * Author: Bogdan Barbu
  * Team: Codingheads (codingheads.com)
  *
- * version 0.3
+ * version 1.0
  */
 export default class lazyLoadAssets {
   #container = document.body;
@@ -21,11 +21,7 @@ export default class lazyLoadAssets {
 
   constructor(
     container = document.body,
-    {
-      useMutationObserver = true,
-      init = true,
-      plugins = [activateOnScroll],
-    } = {}
+    { useMutationObserver = true, init = true, plugins = [activateOnScroll] } = {}
   ) {
     // save the settings
     this.#container = container;

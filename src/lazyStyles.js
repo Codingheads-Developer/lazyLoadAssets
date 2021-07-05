@@ -1,13 +1,9 @@
-/** @format */
-
-/**!
+/**
  * lazyStyles
  * JS Plugin to lazy load styles
  *
  * Author: Bogdan Barbu
  * Team: Codingheads (codingheads.com)
- *
- * version 0.3
  */
 export default class lazyStyles {
   static initializer(container) {

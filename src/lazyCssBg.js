@@ -1,16 +1,12 @@
-/** @format */
-
 import activateOnScroll from './activateOnScroll';
 import imagesLoaded from 'imagesloaded';
 
-/**!
+/**
  * lazyCssBg
  * JS Plugin to lazy load css image backgrounds
  *
  * Author: Bogdan Barbu
  * Team: Codingheads (codingheads.com)
- *
- * version 0.3
  */
 export default class lazyCssBg {
   /**

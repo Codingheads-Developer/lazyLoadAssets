@@ -1,4 +1,3 @@
-/** @format */
 import activateOnScroll from './activateOnScroll';
 import lazyCssBg from './lazyCssBg';
 import lazyIframe from './lazyIframe';

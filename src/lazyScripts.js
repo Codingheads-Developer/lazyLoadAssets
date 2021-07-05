@@ -1,13 +1,9 @@
-/** @format */
-
-/**!
+/**
  * lazyScripts
  * JS Plugin to lazy load scripts
  *
  * Author: Bogdan Barbu
  * Team: Codingheads (codingheads.com)
- *
- * version 0.3
  */
 export default class lazyScripts {
   static initializer(container) {

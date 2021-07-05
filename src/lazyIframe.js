@@ -1,13 +1,8 @@
 /**
  * JS plugin to lazy load iframes
- * requires IntersectionObserver and activateOnScroll.js
- *
- * version 0.3
  *
  * Author: Bogdan Barbu
  * Team: Codingheads (codingheads.com)
- *
- * @format
  */
 
 import activateOnScroll from './activateOnScroll';

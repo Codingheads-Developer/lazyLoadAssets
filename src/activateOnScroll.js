@@ -1,5 +1,3 @@
-/** @format */
-
 import imagesLoaded from 'imagesloaded';
 import { debounce, deepEquals } from '../utils/utils';
 
@@ -7,13 +5,8 @@ import { debounce, deepEquals } from '../utils/utils';
  * ActivateOnScroll - Plugin to activate stuff when objects come in view
  * Also for lazy images / lazy interchange
  *
- * requires IntersectionObserver
- *
  * Author: Bogdan Barbu
  * Team: Codingheads (codingheads.com)
- *
- * version 0.3
- * MIT licence
  */
 export default class activateOnScroll {
   // store the observers into an array, so that we might reuse them
