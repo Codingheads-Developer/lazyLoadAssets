@@ -1,5 +1,3 @@
-/** @format */
-
 // deep compare objects
 export const deepEquals = (x, y) => {
   if (x === y) return true;
@@ -67,4 +65,14 @@ export const debounce = (func, wait, immediate) => {
     timeout = setTimeout(later, wait);
     if (callNow) func.apply(context, args);
   };
+};
+
+export const isFunction = value => {
+  // from https://stackoverflow.com/a/55785839
+  return (
+    Boolean(value) &&
+    (Object.prototype.toString.call(value) === '[object Function]' ||
+      'function' === typeof value ||
+      value instanceof Function)
+  );
 };

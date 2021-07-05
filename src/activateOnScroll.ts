@@ -20,19 +20,19 @@ export default class activateOnScroll {
   static #savedObservers = [];
 
   // the options with their defaults
-  #activatedClass = 'animation-started';
-  #activatedClassTargetSelector = false; // where to add the activatedClass
-  #initAttribute = 'activateOnScrollInit';
+  #activatedClass: string = 'animation-started';
+  #activatedClassTargetSelector: string | false = false; // where to add the activatedClass
+  #initAttribute: string = 'activateOnScrollInit';
   #options = {
     rootMargin: '300px 100px',
   };
-  #callback = false;
+  #callback: Function | false = false;
   #removable = true;
   #fadeIn = false;
   #activateWithParent = true;
   #lazyAnimClass = '';
-  #observer = null;
-  #element = null;
+  #observer: IntersectionObserver = null;
+  #element: HTMLElement = null;
 
   static #supportScroll =
     'onscroll' in window &&
@@ -47,7 +47,7 @@ export default class activateOnScroll {
       });
     };
     if ('requestIdleCallback' in window) {
-      window.requestIdleCallback(resize);
+      (window as any).requestIdleCallback(resize);
     } else {
       resize();
     }
@@ -65,6 +65,15 @@ export default class activateOnScroll {
       intoViewTimestamp = false,
       fadeIn = false,
       inPicture = false,
+    }: {
+      activatedClass?: string;
+      isLazyBg?: boolean;
+      isLazyImg?: boolean;
+      interchangeSizes?: Array<any> | false;
+      interchange?: boolean;
+      fadeIn?: boolean;
+      inPicture?: boolean;
+      intoViewTimestamp?: number | false;
     } = {}
   ) => {
     requestAnimationFrame(() => {
@@ -77,7 +86,7 @@ export default class activateOnScroll {
       // wait for a minimum interval before fading in
       const minInterval = 200,
         time = new Date(),
-        interval = time.getTime() - intoViewTimestamp;
+        interval = time.getTime() - parseFloat(intoViewTimestamp.toString());
       if (element.tagName == 'IMG' || interval > minInterval) {
         requestAnimationFrame(() => {
           element.style.opacity = 1;
@@ -92,7 +101,7 @@ export default class activateOnScroll {
     }
     if (isLazyImg && !interchangeSizes && !inPicture) {
       // trigger a window resize - but debounce it
-      this.#triggerResize();
+      activateOnScroll.#triggerResize();
     }
     if (
       interchangeSizes &&
@@ -121,7 +130,7 @@ export default class activateOnScroll {
       isLazyImg = 'lazyImg' in dataset || 'srcset' in dataset,
       interchangeSizes = dataset.interchangeSizes;
     const finish = () => {
-      this.#finishActivatingElement(element, {
+      activateOnScroll.#finishActivatingElement(element, {
         activatedClass,
         isLazyBg,
         isLazyImg,
@@ -159,7 +168,7 @@ export default class activateOnScroll {
         element.dataset.foundationLoaded = true;
         if ('jQuery' in window && 'foundation' in jQuery.fn) {
           setTimeout(() => {
-            jQuery(element).foundation();
+            (jQuery(element) as any).foundation();
           });
         }
       }
@@ -198,7 +207,7 @@ export default class activateOnScroll {
     const targetEl = this.#activatedClassTargetSelector
       ? this.#element.querySelector(this.#activatedClassTargetSelector)
       : false;
-    const target = targetEl || this.#element;
+    const target = (targetEl || this.#element) as HTMLElement;
 
     // custom activated class
     const elementactivatedClass = target.dataset.activated;
@@ -213,11 +222,7 @@ export default class activateOnScroll {
 
     // add animation class
     this.#lazyAnimClass = target.dataset.lazyAnimation;
-    if (
-      this.#activatedClass &&
-      this.#activatedClass.length &&
-      !this.#lazyAnimClass
-    ) {
+    if (this.#activatedClass && this.#activatedClass.length && !this.#lazyAnimClass) {
       requestAnimationFrame(() => {
         target.classList.add(this.#activatedClass);
       });
@@ -226,7 +231,7 @@ export default class activateOnScroll {
     // trigger the callback
     if (this.#callback) {
       setTimeout(() =>
-        this.#callback(this.#element, {
+        (this.#callback as Function)(this.#element, {
           activatedClass: this.#activatedClass,
           callback: this.#callback,
           fadeIn: this.#fadeIn,
@@ -249,8 +254,7 @@ export default class activateOnScroll {
 
     // trigger loading for picture source tags
     const parent = this.#element.parentElement;
-    const inPicture =
-      this.#element.tagName == 'IMG' && parent.tagName == 'PICTURE';
+    const inPicture = this.#element.tagName == 'IMG' && parent.tagName == 'PICTURE';
     if (inPicture) {
       parent.querySelectorAll('source').forEach(element =>
         activateOnScroll.activateElement(element, {
@@ -282,7 +286,7 @@ export default class activateOnScroll {
     if (this.#initAttribute in this.#element.dataset) return;
 
     // signal that this is initialized
-    this.#element.dataset[this.#initAttribute] = true;
+    this.#element.dataset[this.#initAttribute] = 'true';
 
     // start right away if this is a google bot or a legacy browser
     if (!activateOnScroll.#supportScroll) {
@@ -299,7 +303,10 @@ export default class activateOnScroll {
 
     // set the width and height of the image even if it's not loaded yet, so no moving around will happen on load
     const interchangeSizesJSON = this.#element.dataset.interchangeSizes;
-    if (interchangeSizesJSON && typeof Foundation.MediaQuery != 'undefined') {
+    if (
+      interchangeSizesJSON &&
+      typeof (window as any).Foundation.MediaQuery != 'undefined'
+    ) {
       let interchangeSizes;
       try {
         interchangeSizes = JSON.parse(interchangeSizesJSON);
@@ -309,7 +316,7 @@ export default class activateOnScroll {
       if (interchangeSizes) {
         const addImageSizes = () => {
           window.requestAnimationFrame(() => {
-            let currentSize = Foundation.MediaQuery.current;
+            let currentSize = (window as any).MediaQuery.current;
             // if foundation is already loaded, don't do this any more
             if ('foundationLoaded' in this.#element.dataset) {
               ['changed.zf.mediaquery'].forEach(eventType => {
@@ -319,30 +326,23 @@ export default class activateOnScroll {
             }
             if (!(currentSize in interchangeSizes)) {
               // search a valid image size
-              const availableSizes = Object.getOwnPropertyNames(
-                interchangeSizes
-              ).reverse();
+              const availableSizes =
+                Object.getOwnPropertyNames(interchangeSizes).reverse();
               for (let i = 0, max = availableSizes.length; i < max; i++) {
-                if (Foundation.MediaQuery.atLeast(availableSizes[i])) {
+                if ((window as any).MediaQuery.atLeast(availableSizes[i])) {
                   currentSize = availableSizes[i];
                   break;
                 }
               }
             }
             if (currentSize in interchangeSizes) {
-              this.#element.src =
+              (this.#element as HTMLImageElement).src =
                 `data:image/svg+xml;utf8,` +
                 encodeURI(
                   `<svg xmlns='http://www.w3.org/2000/svg' y='0' x='0' width='${interchangeSizes[currentSize].w}' height='${interchangeSizes[currentSize].h}' viewBox='0 0 ${interchangeSizes[currentSize].w} ${interchangeSizes[currentSize].h}'></svg>`
                 );
-              this.#element.setAttribute(
-                'width',
-                interchangeSizes[currentSize].w
-              );
-              this.#element.setAttribute(
-                'height',
-                interchangeSizes[currentSize].h
-              );
+              this.#element.setAttribute('width', interchangeSizes[currentSize].w);
+              this.#element.setAttribute('height', interchangeSizes[currentSize].h);
             }
           });
         };
@@ -355,7 +355,7 @@ export default class activateOnScroll {
   }
 
   constructor(
-    element,
+    element: HTMLElement,
     {
       activatedClass = 'animation-started',
       activatedClassTargetSelector = false,
@@ -367,6 +367,15 @@ export default class activateOnScroll {
       removable = true,
       fadeIn = false,
       activateWithParent = true,
+    }: {
+      activatedClass?: string;
+      activatedClassTargetSelector?: string | false;
+      initAttribute?: string;
+      options?: any;
+      callback?: Function | false;
+      removable?: boolean;
+      fadeIn?: boolean;
+      activateWithParent?: boolean;
     } = {}
   ) {
     // store the settings
@@ -379,10 +388,10 @@ export default class activateOnScroll {
     this.#fadeIn = fadeIn;
     this.#activateWithParent = activateWithParent;
     this.#element = element;
-    this.#element.activateOnScrollInstance = this;
+    (this.#element as any).activateOnScrollInstance = this;
 
     // search for an existing observer
-    let observer = false;
+    let observer: IntersectionObserver = null;
     const args = [
       activatedClass,
       activatedClassTargetSelector,
@@ -419,8 +428,7 @@ export default class activateOnScroll {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             // allow cancelling the event
-            if (!dispatchTargetEvent(entry, 'willActivateOnScroll', observer))
-              return;
+            if (!dispatchTargetEvent(entry, 'willActivateOnScroll', observer)) return;
 
             // don't reobserve
             if (this.#removable) observer.unobserve(entry.target);
@@ -444,7 +452,7 @@ export default class activateOnScroll {
     this.#element.addEventListener('activatedOnScroll', e => {
       if (e.target == this.#element && this.#removable) {
         this.#observer.unobserve(this.#element);
-        this.#element.activateOnScrollInstance = null;
+        (this.#element as any).activateOnScrollInstance = null;
       }
     });
 
@@ -482,13 +490,13 @@ export default class activateOnScroll {
 
   // save to the window object
   static saveToGlobal(global = window) {
-    global.activateOnScroll = activateOnScroll;
+    (global as any).activateOnScroll = activateOnScroll;
   }
 
   /* register a jQuery plugin, if jquery is in the page */
   static addToJquery() {
     if ('jQuery' in window) {
-      window.jQuery.fn.activateOnScroll = function (options) {
+      (window as any).jQuery.fn.activateOnScroll = function (options) {
         this.each((i, element) => new activateOnScroll(element, options));
         return this;
       };
@@ -497,3 +505,4 @@ export default class activateOnScroll {
 }
 
 activateOnScroll.addToJquery();
+activateOnScroll.saveToGlobal();
