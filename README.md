@@ -23,8 +23,8 @@ import {
   lazyCssBg,
   lazyLoadAssets,
   animate,
+  onInteractive,
 } from '@codingheads/lazyload';
-import { onInteractive } from '@codingheads/lazyload/utils/onReady';
 
 onInteractive(() => {
   new lazyLoadAssets(document.body, {
