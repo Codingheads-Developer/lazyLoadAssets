@@ -1,36 +1,33 @@
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const WebpackNotifierPlugin = require('webpack-notifier');
 
 const postcssConfig = require('./postcss.config');
 
-const devMode = process.env.NODE_ENV === 'development';
-
-const makeConfig = devMode => {
+const makeConfig = () => {
   const plugins = [
     new MiniCssExtractPlugin({
       filename: '../css/[name].css',
       chunkFilename: '[id].css',
     }),
-    new WebpackNotifierPlugin({
-      skipFirstNotification: true,
-    }),
   ];
 
   const config = {
     entry: {
-      index: ['./src/index.js'],
+      index: ['./src/index.ts'],
     },
     output: {
-      path: path.resolve(__dirname, './dist/'),
+      path: path.resolve(__dirname, '../dist/umd'),
       filename: '[name].js',
+      library: 'lazyLoadAssets',
+      libraryTarget: 'umd',
+      globalObject: 'this',
     },
-    mode: devMode ? 'development' : 'production',
+    mode: 'production',
     module: {
       rules: [
         {
           test: /^(?!.*\.{test,min}\.(js|ts)x?$).*\.(js|ts)x?$/,
-          exclude: /node_modules\/(?!(tsparticles)\/).*/,
+          exclude: /node_modules/,
           use: [
             {
               loader: 'babel-loader',
@@ -48,10 +45,7 @@ const makeConfig = devMode => {
               loader: MiniCssExtractPlugin.loader,
               options: {
                 publicPath: (resourcePath, context) => {
-                  const newPath = path.relative(
-                    path.dirname(resourcePath),
-                    context
-                  );
+                  const newPath = path.relative(path.dirname(resourcePath), context);
                   return newPath.replace('\\', '/') + '/css/';
                 },
               },
@@ -96,4 +90,4 @@ const makeConfig = devMode => {
   return config;
 };
 
-module.exports = makeConfig(devMode);
+module.exports = makeConfig();

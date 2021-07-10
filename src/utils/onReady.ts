@@ -1,9 +1,11 @@
+/** @format */
+
 /**
  * Run a callback when the document.readyState has a certain value
  * @param {string|string[]} state - the state(s) when to run the callback
  * @param {Function} callback - the callback to run
  */
-export const onReadyState = (state, callback) => {
+export const onReadyState = (state: string | string[], callback: Function): void => {
   const validStates = Array.isArray(state) ? state : [state];
   const checkAndRun = () => {
     if (validStates.includes(document.readyState)) {
@@ -23,7 +25,7 @@ export const onReadyState = (state, callback) => {
  * (DOM + assets are loaded)
  * @param {Function} callback - the callback to run
  */
-export const onComplete = callback =>
+export const onComplete = (callback: Function): void =>
   onReadyState(['complete', 'loaded'], callback);
 
 /**
@@ -31,10 +33,8 @@ export const onComplete = callback =>
  * (DOM is loaded - equivalent to DOMContentLoaded)
  * @param {Function} callback - the callback to run
  */
-export const onInteractive = callback => onReadyState('interactive', callback);
+export const onInteractive = (callback: Function): void =>
+  onReadyState('interactive', callback);
 export const onReady = onInteractive;
 
-window.onReady = onReady;
-window.onComplete = onComplete;
-window.onInteractive = onInteractive;
 export default onReady;

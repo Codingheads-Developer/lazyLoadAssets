@@ -12,19 +12,19 @@ export default class lazyCssBg {
   /**
    * initializer to be used with lazyLoadAssets
    */
-  static initializer(container) {
+  static initializer(container: HTMLElement = document.body) {
     const elements = container.querySelectorAll(
       `[data-lazy-css-bg]:not([data-lazycssbg-init])`
     );
     if (elements.length) {
-      elements.forEach(element => {
-        new activateOnScroll(element, {
+      [...elements].forEach(element => {
+        new activateOnScroll(element as HTMLElement, {
           initAttribute: 'lazycssbgInit',
-          callback: target => {
+          callback: (target: HTMLElement) => {
             setTimeout(() => {
               imagesLoaded(target, { background: true }, function () {
                 requestAnimationFrame(() => {
-                  target.dataset.cssBgLoaded = true;
+                  target.dataset.cssBgLoaded = 'true';
                   target.dispatchEvent(
                     new CustomEvent('lazyCssBgLoaded', {
                       bubbles: true,
@@ -40,12 +40,12 @@ export default class lazyCssBg {
   }
 
   // the cleaner, to be used in lazyLoadAssets
-  static cleaner(node) {
+  static cleaner(node: HTMLElement) {
     node.removeAttribute('data-lazycssbg-init');
   }
 
   // save to the window object
   static saveToGlobal(global = window) {
-    global.lazyCssBg = lazyCssBg;
+    (global as any).lazyCssBg = lazyCssBg;
   }
 }

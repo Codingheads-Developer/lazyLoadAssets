@@ -5,17 +5,16 @@
  * Team: Codingheads (codingheads.com)
  */
 
-import activateOnScroll from './activateOnScroll';
+import activateOnScroll, { ActivateOnScrollOptions } from './activateOnScroll';
 
 export default class lazyIframe {
   #element = null;
-  #options = {};
+  #options: ActivateOnScrollOptions = {};
 
   // activate for iframes within container
-  static #activateForContainer(iframeContainer) {
+  static #activateForContainer(iframeContainer: HTMLElement) {
     // remove all other content - that is, the placeholder image
-    const items = [].filter.call(
-      iframeContainer.children,
+    const items = [...iframeContainer.children].filter(
       item =>
         item.nodeType === 1 &&
         !item.matches('iframe[data-lazysrc]') &&
@@ -25,9 +24,11 @@ export default class lazyIframe {
       items.forEach(item => item.remove());
     }
     iframeContainer.removeAttribute('data-lazy-iframe');
-    const iframe = iframeContainer.querySelector('iframe[data-lazysrc]');
+    const iframe = iframeContainer.querySelector(
+      'iframe[data-lazysrc]'
+    ) as HTMLIFrameElement;
     if (iframe) {
-      const iframeBg = iframe.closest('.bg-video-container');
+      const iframeBg = iframe.closest('.bg-video-container') as HTMLElement;
       iframe.src = iframe.dataset.lazysrc;
       if (iframeBg) {
         iframe.addEventListener('load', () =>
@@ -41,11 +42,11 @@ export default class lazyIframe {
   }
 
   // activate for iframes without container
-  static #activateForIframe(iframe) {
+  static #activateForIframe(iframe: HTMLIFrameElement) {
     iframe.src = iframe.dataset.lazysrc;
     iframe.removeAttribute('data-lazysrc');
 
-    const iframeBg = iframe.closest('.bg-video-container');
+    const iframeBg = iframe.closest('.bg-video-container') as HTMLElement;
     if (iframeBg) {
       iframe.addEventListener('load', () =>
         setTimeout(() => {
@@ -55,17 +56,17 @@ export default class lazyIframe {
     }
   }
 
-  static #activate(container) {
+  static #activate(container: HTMLElement = document.body) {
     const hasContainer = !container.matches('iframe');
 
     if (hasContainer) {
       lazyIframe.#activateForContainer(container);
     } else {
-      lazyIframe.#activateForIframe(container);
+      lazyIframe.#activateForIframe(container as HTMLIFrameElement);
     }
   }
 
-  constructor(element) {
+  constructor(element: HTMLElement) {
     this.#element = element;
 
     // the activateOnScroll options
@@ -100,24 +101,24 @@ export default class lazyIframe {
       `[data-lazy-iframe]:not([data-lazyiframe-init])`
     );
     if (lazyIframeElements.length) {
-      lazyIframeElements.forEach(element => new lazyIframe(element));
+      [...lazyIframeElements].forEach((element: HTMLElement) => new lazyIframe(element));
     }
   }
 
   // the cleaner, to be used in lazyLoadAssets
-  static cleaner(node) {
+  static cleaner(node: HTMLElement) {
     node.removeAttribute('data-lazyiframe-init');
   }
 
   // save to the window object
   static saveToGlobal(global = window) {
-    global.lazyIframe = lazyIframe;
+    (global as any).lazyIframe = lazyIframe;
   }
 
   // register jQuery plugin, if jQuery is available
   static addToJquery() {
     if ('jQuery' in window) {
-      window.jQuery.fn.lazyIframe = function () {
+      (window as any).jQuery.fn.lazyIframe = function () {
         this.each((_i, element) => new lazyIframe(element));
         return this;
       };

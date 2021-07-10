@@ -1,5 +1,5 @@
 /** @format */
-import { debounce } from '../utils/utils';
+import { debounce } from './utils/utils';
 import activateOnScroll from './activateOnScroll';
 
 /**!
@@ -14,14 +14,22 @@ import activateOnScroll from './activateOnScroll';
  * version 1.0
  */
 export default class lazyLoadAssets {
-  #container = document.body;
-  #useMutationObserver = true;
-  #observer = null;
-  #plugins = [];
+  #container: HTMLElement;
+  #useMutationObserver: boolean;
+  #observer: MutationObserver = null;
+  #plugins: Array<any>;
 
   constructor(
-    container = document.body,
-    { useMutationObserver = true, init = true, plugins = [activateOnScroll] } = {}
+    container: HTMLElement = document.body,
+    {
+      useMutationObserver = true,
+      init = true,
+      plugins = [activateOnScroll],
+    }: {
+      useMutationObserver?: boolean;
+      init?: boolean;
+      plugins?: Array<any>;
+    } = {}
   ) {
     // save the settings
     this.#container = container;
@@ -36,7 +44,7 @@ export default class lazyLoadAssets {
 
   debouncedActivate = debounce(() => this.activate(), 100);
 
-  clean(node) {
+  clean(node: HTMLElement) {
     this.#plugins.forEach(plugin => plugin.cleaner && plugin.cleaner(node));
   }
 

@@ -1,3 +1,5 @@
+import activateOnScroll from './activateOnScroll';
+
 /**
  * lazyStyles
  * JS Plugin to lazy load styles
@@ -6,24 +8,25 @@
  * Team: Codingheads (codingheads.com)
  */
 export default class lazyStyles {
-  static initializer(container) {
+  static initializer(container: HTMLElement = document.body) {
     const elements = container.querySelectorAll(
       `[data-lazy-stylesheet]:not([data-lazystylesheet-init])`
     );
     if (elements.length) {
       elements.forEach(element => {
-        new activateOnScroll(element, {
+        new activateOnScroll(element as HTMLElement, {
           initAttribute: 'lazystylesheetInit',
           options: {
             rootMargin: '600px 200px',
           },
-          callback: target => {
-            let styles = target.dataset.lazyStylesheet;
+          callback: (target: HTMLElement) => {
+            let stylesData = target.dataset.lazyStylesheet;
+            let styles: string[];
             try {
-              const scriptsArray = JSON.parse(styles);
+              const scriptsArray = JSON.parse(stylesData);
               styles = scriptsArray;
             } catch (e) {
-              styles = [styles];
+              styles = [stylesData];
             }
             styles.forEach(style => {
               const styleElement = document.createElement('link');

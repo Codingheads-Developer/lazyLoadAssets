@@ -51,7 +51,7 @@ export const throttle = (func, limit = 100) => {
 // be triggered. The function will be called after it stops being called for
 // N milliseconds. If `immediate` is passed, trigger the function on the
 // leading edge, instead of the trailing.
-export const debounce = (func, wait, immediate) => {
+export const debounce = (func, wait, immediate = false) => {
   let timeout;
   return function () {
     const context = this,

@@ -7,13 +7,14 @@
     "types": ["node"],
     "strict": false,
     "allowJs": true,
-    "noEmit": true,
     "isolatedModules": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "jsx": "preserve",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+    "useDefineForClassFields": true
   },
   "include": ["src"]
 }
