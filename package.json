@@ -1,6 +1,6 @@
 {
   "name": "@codingheads/lazyload",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A set of lazyload utilities, for images, scripts, styles and iframes",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
