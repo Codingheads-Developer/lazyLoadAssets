@@ -17,6 +17,7 @@ For example:
 ```javascript
 import {
   activateOnScroll,
+  lazyVideo,
   lazyIframe,
   lazyScripts,
   lazyStyles,
@@ -28,7 +29,15 @@ import {
 
 onInteractive(() => {
   new lazyLoadAssets(document.body, {
-    plugins: [activateOnScroll, lazyIframe, lazyCssBg, lazyScripts, lazyStyles, animate],
+    plugins: [
+      activateOnScroll,
+      lazyVideo,
+      lazyIframe,
+      lazyCssBg,
+      lazyScripts,
+      lazyStyles,
+      animate,
+    ],
   });
 });
 ```
@@ -130,6 +139,26 @@ onInteractive(() => {
    ```
 
    When the element comes into view, it will receive the `load-from-left` class which can be used to animate the element.
+
+   You can also set the `rootMargin` for the IntersectionObserver by using the `data-root-margin` attribute.
+
+   ```html
+   <div data-animate="load-from-left" data-root-margin="500px 200px">
+     Text loaded from left...
+   </div>
+   ```
+
+7. `lazyVideo`
+
+   This will allow you to create video elements that are loaded only when they come into view.
+   Use the `data-lazy-video` attribute on the video element, and replace `src` with `data-src` on the source element tags:
+
+   ```html
+   <video data-lazy-video autoplay muted loop playsinline>
+     <source data-src="one-does-not-simply.webm" type="video/webm" />
+     <source data-src="one-does-not-simply.mp4" type="video/mp4" />
+   </video>
+   ```
 
 ## New content (AJAX etc)
 

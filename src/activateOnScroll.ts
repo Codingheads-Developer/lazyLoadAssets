@@ -27,6 +27,13 @@ export interface ActivateOnScrollOptions {
  * Team: Codingheads (codingheads.com)
  */
 export default class activateOnScroll {
+  /**
+   * default options for the Intersection observer
+   */
+  static observerOptions: IntersectionObserverInit = {
+    rootMargin: '300px 100px',
+  };
+
   // store the observers into an array, so that we might reuse them
   static #savedObservers = [];
 
@@ -34,9 +41,7 @@ export default class activateOnScroll {
   #activatedClass = 'animation-started';
   #activatedClassTargetSelector = null; // where to add the activatedClass
   #initAttribute = 'activateOnScrollInit';
-  #options: IntersectionObserverInit = {
-    rootMargin: '300px 100px',
-  };
+  #options: IntersectionObserverInit;
   #callback: Function | null = null;
   #removable = true;
   #fadeIn = false;
@@ -371,9 +376,7 @@ export default class activateOnScroll {
       activatedClass = 'animation-started',
       activatedClassTargetSelector = null,
       initAttribute = 'activateOnScrollInit',
-      options = {
-        rootMargin: '100px 0px', // trigger the animation before the objects are in sight
-      },
+      options = undefined,
       callback = null,
       removable = true,
       fadeIn = false,
@@ -384,7 +387,7 @@ export default class activateOnScroll {
     this.#activatedClass = activatedClass;
     this.#activatedClassTargetSelector = activatedClassTargetSelector;
     this.#initAttribute = initAttribute;
-    this.#options = options;
+    this.#options = options || activateOnScroll.observerOptions;
     this.#callback = callback;
     this.#removable = removable;
     this.#fadeIn = fadeIn;

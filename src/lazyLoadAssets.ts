@@ -5,13 +5,11 @@ import activateOnScroll from './activateOnScroll';
 /**!
  * lazyLoadAssets
  * JS Plugin to lazy load assets (images, iframes, scripts and css files)
- * depends on activateOnScroll.js, lazyIframe.js
- * requires IntersectionObserver, MutationObserver, activateOnScroll.js, lazyIframe.js
+ * depends on activateOnScroll
+ * requires IntersectionObserver, MutationObserver, activateOnScroll
  *
  * Author: Bogdan Barbu
  * Team: Codingheads (codingheads.com)
- *
- * version 1.0
  */
 export default class lazyLoadAssets {
   #container: HTMLElement;

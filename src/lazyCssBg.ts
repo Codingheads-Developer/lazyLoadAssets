@@ -10,6 +10,26 @@ import imagesLoaded from 'imagesloaded';
  */
 export default class lazyCssBg {
   /**
+   * Options to be set on the intersection observer
+   */
+  static observerOptions: IntersectionObserverInit = {};
+
+  static initializeElement = (target: HTMLElement) => {
+    window.requestAnimationFrame(() => {
+      imagesLoaded(target, { background: true }, function () {
+        requestAnimationFrame(() => {
+          target.dataset.cssBgLoaded = 'true';
+          target.dispatchEvent(
+            new CustomEvent('lazyCssBgLoaded', {
+              bubbles: true,
+            })
+          );
+        });
+      });
+    });
+  };
+
+  /**
    * initializer to be used with lazyLoadAssets
    */
   static initializer(container: HTMLElement = document.body) {
@@ -20,20 +40,8 @@ export default class lazyCssBg {
       [...elements].forEach(element => {
         new activateOnScroll(element as HTMLElement, {
           initAttribute: 'lazycssbgInit',
-          callback: (target: HTMLElement) => {
-            setTimeout(() => {
-              imagesLoaded(target, { background: true }, function () {
-                requestAnimationFrame(() => {
-                  target.dataset.cssBgLoaded = 'true';
-                  target.dispatchEvent(
-                    new CustomEvent('lazyCssBgLoaded', {
-                      bubbles: true,
-                    })
-                  );
-                });
-              });
-            });
-          },
+          options: this.observerOptions,
+          callback: this.initializeElement,
         });
       });
     }
@@ -46,6 +54,6 @@ export default class lazyCssBg {
 
   // save to the window object
   static saveToGlobal(global = window) {
-    (global as any).lazyCssBg = lazyCssBg;
+    (global as any).lazyCssBg = this;
   }
 }
