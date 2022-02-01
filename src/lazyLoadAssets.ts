@@ -75,6 +75,7 @@ export default class lazyLoadAssets {
                 '[data-lazyimg-init]',
                 '[data-lazyiframe-init]',
                 '[data-lazycssbg-init]',
+                '[data-lazy-video-init]',
               ].join(', ')
             );
             if (toClear.length)
