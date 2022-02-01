@@ -11,7 +11,7 @@ export default class animate {
    * Options to be set on the intersection observer
    */
   static observerOptions = {
-    rootMargin: '300px 100px',
+    rootMargin: '0px',
   };
 
   /**
@@ -47,7 +47,10 @@ export default class animate {
             : {};
         new activateOnScroll(element, {
           initAttribute: 'animateInit',
-          options: { ...options, ...this.observerOptions },
+          options: {
+            ...this.observerOptions,
+            ...options,
+          },
           callback: this.initializeElement,
         });
       });
