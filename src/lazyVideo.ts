@@ -22,8 +22,10 @@ export default class lazyVideo {
     [...video.children].forEach(child => {
       if (typeof child.tagName === 'string' && child.tagName === 'SOURCE') {
         const source = child as HTMLSourceElement;
-        source.src = source.dataset.src;
-        delete source.dataset.src;
+        if (source.dataset.src) {
+          source.src = source.dataset.src;
+          delete source.dataset.src;
+        }
       }
     });
 
