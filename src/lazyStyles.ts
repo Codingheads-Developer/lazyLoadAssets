@@ -17,6 +17,7 @@ export default class lazyStyles {
 
   static initializeElement = (target: HTMLElement) => {
     let stylesData = target.dataset.lazyStylesheet;
+    const allowMultipleRuns = target.dataset.lazyStylesheetAllowMultiple || false;
     let styles: string[];
     try {
       const scriptsArray = JSON.parse(stylesData);
@@ -24,7 +25,18 @@ export default class lazyStyles {
     } catch (e) {
       styles = [stylesData];
     }
+
+    const existingStyles = Array.from(document.styleSheets);
+
     styles.forEach(style => {
+      // Don't run multiple times.
+      if (!allowMultipleRuns) {
+        const existing = existingStyles.find(existing => existing.href == style);
+        if (existing) {
+          return;
+        }
+      }
+
       const styleElement = document.createElement('link');
       styleElement.rel = 'stylesheet';
       styleElement.type = 'text/css';

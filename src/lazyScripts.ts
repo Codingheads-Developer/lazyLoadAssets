@@ -17,6 +17,7 @@ export default class lazyScripts {
 
   static initializeElement = (target: HTMLElement) => {
     let scriptsData: string = target.dataset.lazyScript;
+    const allowMultipleRuns = target.dataset.lazyScriptAllowMultiple || false;
     let scripts: string[];
     try {
       const scriptsArray = JSON.parse(scriptsData);
@@ -24,7 +25,18 @@ export default class lazyScripts {
     } catch (e) {
       scripts = [scriptsData];
     }
+
+    const existingScripts = Array.from(document.scripts);
+
     scripts.forEach(script => {
+      if (!allowMultipleRuns) {
+        // Don't run multiple times.
+        const existing = existingScripts.find(existing => existing.src == script);
+        if (existing) {
+          return;
+        }
+      }
+
       const scriptElement = document.createElement('script');
       scriptElement.src = script;
       document.head.appendChild(scriptElement);
