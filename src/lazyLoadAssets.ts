@@ -64,7 +64,7 @@ export default class lazyLoadAssets {
         const addedNodes = mutationList.reduce(
           (added, mutation) => [
             ...added,
-            Array.from(mutation.addedNodes).filter(
+            ...Array.from(mutation.addedNodes).filter(
               node =>
                 node.nodeType == Node.ELEMENT_NODE &&
                 !['SCRIPT', 'LINK'].includes((node as HTMLElement).tagName)
