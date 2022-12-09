@@ -12,11 +12,11 @@ import activateOnScroll from './activateOnScroll';
  * Team: Codingheads (codingheads.com)
  */
 export default class lazyLoadAssets {
-  #container: HTMLElement;
-  #useMutationObserver: boolean;
+  container: HTMLElement;
+  useMutationObserver: boolean;
   #observer: MutationObserver | null = null;
-  #plugins: Array<any>;
-  #imagesLoaded: ImagesLoaded.ImagesLoadedConstructor | null = null;
+  plugins: Array<any>;
+  imagesLoaded: ImagesLoaded.ImagesLoadedConstructor | null = null;
 
   constructor(
     container: HTMLElement = document.body,
@@ -33,24 +33,24 @@ export default class lazyLoadAssets {
     } = {}
   ) {
     // save the settings
-    this.#container = container;
-    this.#useMutationObserver = useMutationObserver;
-    this.#plugins = plugins;
-    this.#imagesLoaded = imagesLoaded;
+    this.container = container;
+    this.useMutationObserver = useMutationObserver;
+    this.plugins = plugins;
+    this.imagesLoaded = imagesLoaded;
     if (init) this.init();
   }
 
   activate() {
-    this.#plugins.forEach(plugin => {
-      plugin.imagesLoaded = this.#imagesLoaded;
-      plugin.initializer(this.#container);
+    this.plugins.forEach(plugin => {
+      plugin.parent = this;
+      plugin.initializer(this.container);
     });
   }
 
   debouncedActivate = debounce(() => this.activate(), 100);
 
   clean(node: HTMLElement) {
-    this.#plugins.forEach(plugin => plugin.cleaner && plugin.cleaner(node));
+    this.plugins.forEach(plugin => plugin.cleaner && plugin.cleaner(node));
   }
 
   init() {
@@ -58,7 +58,7 @@ export default class lazyLoadAssets {
     this.activate();
 
     // observe if new elements are added - for example, by AJAX or infinite scroll
-    if (this.#useMutationObserver && 'MutationObserver' in window) {
+    if (this.useMutationObserver && 'MutationObserver' in window) {
       this.#observer = new MutationObserver(mutationList => {
         // check if new elements are added
         const addedNodes = mutationList.reduce(
@@ -94,7 +94,7 @@ export default class lazyLoadAssets {
           this.debouncedActivate();
         }
       });
-      this.#observer.observe(this.#container, {
+      this.#observer.observe(this.container, {
         attributes: false,
         childList: true,
         subtree: true,

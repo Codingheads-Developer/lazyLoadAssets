@@ -1,4 +1,5 @@
 import type imagesLoaded from 'imagesloaded';
+import lazyLoadAssets from './lazyLoadAssets';
 import { debounce, deepEquals } from './utils/utils';
 
 export interface LazyLoadPluginConstructor<T> {
@@ -34,7 +35,7 @@ export default class activateOnScroll {
     rootMargin: '300px 100px',
   };
 
-  static imagesLoaded: ImagesLoaded.ImagesLoadedConstructor | null = null;
+  static parent: lazyLoadAssets | null = null;
 
   // store the observers into an array, so that we might reuse them
   static #savedObservers = [];
@@ -141,8 +142,8 @@ export default class activateOnScroll {
     };
 
     if (isLazyBg || isLazyImg) {
-      if (!inPicture && activateOnScroll.imagesLoaded) {
-        activateOnScroll.imagesLoaded(element, { background: true }, finish);
+      if (!inPicture && activateOnScroll.parent?.imagesLoaded) {
+        activateOnScroll.parent.imagesLoaded(element, { background: true }, finish);
       } else {
         if (element.tagName == 'IMG') {
           element.onload = function () {
