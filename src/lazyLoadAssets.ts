@@ -1,6 +1,7 @@
 /** @format */
 import { debounce } from './utils/utils';
 import activateOnScroll from './activateOnScroll';
+import type ImagesLoaded from 'imagesloaded';
 
 /**!
  * lazyLoadAssets

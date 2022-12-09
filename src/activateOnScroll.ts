@@ -1,4 +1,3 @@
-import type imagesLoaded from 'imagesloaded';
 import lazyLoadAssets from './lazyLoadAssets';
 import { debounce, deepEquals } from './utils/utils';
 
@@ -354,7 +353,7 @@ export default class activateOnScroll {
       };
       observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
-          if (entry.isIntersecting) {
+          if (entry.isIntersecting && entry.intersectionRatio > 0) {
             // allow cancelling the event
             if (!dispatchTargetEvent(entry, 'willActivateOnScroll', observer)) return;
 
