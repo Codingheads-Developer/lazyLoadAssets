@@ -1,4 +1,4 @@
-import imagesLoaded from 'imagesloaded';
+import type imagesLoaded from 'imagesloaded';
 import { debounce, deepEquals } from './utils/utils';
 
 export interface LazyLoadPluginConstructor<T> {
@@ -21,7 +21,7 @@ export interface ActivateOnScrollOptions {
 
 /**!
  * ActivateOnScroll - Plugin to activate stuff when objects come in view
- * Also for lazy images / lazy interchange
+ * Also for lazy images
  *
  * Author: Bogdan Barbu
  * Team: Codingheads (codingheads.com)
@@ -33,6 +33,8 @@ export default class activateOnScroll {
   static observerOptions: IntersectionObserverInit = {
     rootMargin: '300px 100px',
   };
+
+  static imagesLoaded: ImagesLoaded.ImagesLoadedConstructor | null = null;
 
   // store the observers into an array, so that we might reuse them
   static #savedObservers = [];
@@ -63,7 +65,7 @@ export default class activateOnScroll {
       });
     };
     if ('requestIdleCallback' in window) {
-      (window as any).requestIdleCallback(resize, { timeout: 100 });
+      window.requestIdleCallback(resize, { timeout: 100 });
     } else {
       resize();
     }
@@ -76,8 +78,6 @@ export default class activateOnScroll {
       activatedClass = '',
       isLazyBg = false,
       isLazyImg = false,
-      interchangeSizes = null,
-      interchange = false,
       intoViewTimestamp = null,
       fadeIn = false,
       inPicture = false,
@@ -85,8 +85,6 @@ export default class activateOnScroll {
       activatedClass?: string;
       isLazyBg?: boolean;
       isLazyImg?: boolean;
-      interchangeSizes?: Array<any>;
-      interchange?: boolean;
       intoViewTimestamp?: number;
       fadeIn?: boolean;
       inPicture?: boolean;
@@ -115,52 +113,36 @@ export default class activateOnScroll {
         }, minInterval - interval);
       }
     }
-    if (isLazyImg && !interchangeSizes && !inPicture) {
+    if (isLazyImg && !inPicture) {
       // trigger a window resize - but debounce it
       this.#triggerResize();
     }
-    if (
-      interchangeSizes &&
-      (isLazyImg || (interchange && 'foundationLoaded' in element.dataset))
-    ) {
-      requestAnimationFrame(() => {
-        if (isLazyImg) element.dataset.imgLoaded = 'true';
-        element.removeAttribute('width');
-        element.removeAttribute('height');
-        element.style.height = '';
-        element.style.width = '';
-      });
-    }
   };
 
-  // activate the element - change src / interchange
+  // activate the element - change src
   static activateElement = (
-    element,
+    element: HTMLElement,
     { activatedClass = '', fadeIn = false, inPicture = false } = {}
   ) => {
     const time = new Date();
     const intoViewTimestamp = time.getTime();
     const dataset = element.dataset,
-      interchange = dataset.lazyInterchange,
       isLazyBg = 'lazyBg' in dataset,
-      isLazyImg = 'lazyImg' in dataset || 'srcset' in dataset,
-      interchangeSizes = dataset.interchangeSizes;
+      isLazyImg = 'lazyImg' in dataset || 'srcset' in dataset;
     const finish = () => {
       this.#finishActivatingElement(element, {
         activatedClass,
         isLazyBg,
         isLazyImg,
-        interchangeSizes,
-        interchange,
         intoViewTimestamp,
         fadeIn,
         inPicture,
       });
     };
 
-    if (interchange || isLazyBg || isLazyImg) {
-      if (!inPicture) {
-        imagesLoaded(element, { background: true }, finish);
+    if (isLazyBg || isLazyImg) {
+      if (!inPicture && activateOnScroll.imagesLoaded) {
+        activateOnScroll.imagesLoaded(element, { background: true }, finish);
       } else {
         if (element.tagName == 'IMG') {
           element.onload = function () {
@@ -173,45 +155,37 @@ export default class activateOnScroll {
       }
       if (fadeIn) {
         requestAnimationFrame(() => {
-          element.style.opacity = 0;
+          element.style.opacity = '0';
           element.style.transition = 'opacity 0.3s';
         });
       }
-      // handle lazy interchange cases
-      if (interchange) {
-        element.dataset.interchange = interchange;
-        element.removeAttribute('data-lazy-interchange');
-        element.dataset.foundationLoaded = true;
-        if ('jQuery' in window && 'foundation' in (window as any).jQuery.fn) {
-          setTimeout(() => {
-            (window as any).jQuery(element).foundation();
-          });
-        }
-      }
+
       if (isLazyBg || isLazyImg) {
+        const image = element as HTMLImageElement;
         requestAnimationFrame(() => {
           const url = dataset.src;
           if (isLazyBg) {
             // background image
-            element.style.backgroundImage = `url(${url})`;
-            element.removeAttribute('data-lazy-bg');
-          } else {
-            // img element
-            if (url) {
-              element.setAttribute('src', url);
-              element.removeAttribute('data-src');
-            }
-            element.removeAttribute('data-lazy-img');
-            const srcset = dataset.srcset,
-              sizes = dataset.sizes;
-            if (srcset) {
-              element.setAttribute('srcset', srcset);
-              element.removeAttribute('data-srcset');
-            }
-            if (sizes) {
-              element.setAttribute('sizes', sizes);
-              element.removeAttribute('data-sizes');
-            }
+            image.style.backgroundImage = `url(${url})`;
+            image.removeAttribute('data-lazy-bg');
+            return;
+          }
+
+          // img element
+          if (url) {
+            image.src = url;
+            image.removeAttribute('data-src');
+          }
+          image.removeAttribute('data-lazy-img');
+          const srcset = dataset.srcset,
+            sizes = dataset.sizes;
+          if (srcset) {
+            image.srcset = srcset;
+            image.removeAttribute('data-srcset');
+          }
+          if (sizes) {
+            image.sizes = sizes;
+            image.removeAttribute('data-sizes');
           }
         });
       }
@@ -316,58 +290,6 @@ export default class activateOnScroll {
         this.#trigger();
       }
     });
-
-    // set the width and height of the image even if it's not loaded yet, so no moving around will happen on load
-    const interchangeSizesJSON = this.#element.dataset.interchangeSizes;
-    if (
-      interchangeSizesJSON &&
-      typeof (window as any).Foundation.MediaQuery != 'undefined'
-    ) {
-      let interchangeSizes: Array<any>;
-      try {
-        interchangeSizes = JSON.parse(interchangeSizesJSON);
-      } catch (error) {
-        interchangeSizes = [];
-      }
-      if (interchangeSizes) {
-        const addImageSizes = () => {
-          window.requestAnimationFrame(() => {
-            let currentSize = (window as any).Foundation.MediaQuery.current;
-            // if foundation is already loaded, don't do this any more
-            if ('foundationLoaded' in this.#element.dataset) {
-              ['changed.zf.mediaquery'].forEach(eventType => {
-                window.removeEventListener(eventType, addImageSizes);
-              });
-              return;
-            }
-            if (!(currentSize in interchangeSizes)) {
-              // search a valid image size
-              const availableSizes =
-                Object.getOwnPropertyNames(interchangeSizes).reverse();
-              for (let i = 0, max = availableSizes.length; i < max; i++) {
-                if ((window as any).Foundation.MediaQuery.atLeast(availableSizes[i])) {
-                  currentSize = availableSizes[i];
-                  break;
-                }
-              }
-            }
-            if (currentSize in interchangeSizes) {
-              this.#element.src =
-                `data:image/svg+xml;utf8,` +
-                encodeURI(
-                  `<svg xmlns='http://www.w3.org/2000/svg' y='0' x='0' width='${interchangeSizes[currentSize].w}' height='${interchangeSizes[currentSize].h}' viewBox='0 0 ${interchangeSizes[currentSize].w} ${interchangeSizes[currentSize].h}'></svg>`
-                );
-              this.#element.setAttribute('width', interchangeSizes[currentSize].w);
-              this.#element.setAttribute('height', interchangeSizes[currentSize].h);
-            }
-          });
-        };
-        addImageSizes();
-        ['changed.zf.mediaquery'].forEach(eventType => {
-          window.addEventListener(eventType, addImageSizes);
-        });
-      }
-    }
   }
 
   constructor(
@@ -396,7 +318,7 @@ export default class activateOnScroll {
     this.#element.activateOnScrollInstance = this;
 
     // search for an existing observer
-    let observer: IntersectionObserver = null;
+    let observer: IntersectionObserver | null = null;
     const args = [
       activatedClass,
       activatedClassTargetSelector,
@@ -468,15 +390,7 @@ export default class activateOnScroll {
   // initializer - to be used with the lazyLoadAssets plugin
   static initializer(container: HTMLElement) {
     const lazyImages = container.querySelectorAll(
-      ['interchange', 'bg', 'img']
-        .reduce(
-          (selector, type) => [
-            ...selector,
-            `[data-lazy-${type}]:not([data-lazyimg-init])`,
-          ],
-          []
-        )
-        .join(', ')
+      ['bg', 'img'].map(type => `[data-lazy-${type}]:not([data-lazyimg-init])`).join(', ')
     );
     if (lazyImages.length) {
       [...lazyImages].forEach(element => {

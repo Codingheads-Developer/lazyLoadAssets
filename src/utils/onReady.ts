@@ -1,14 +1,33 @@
 /** @format */
 
+const documentReadyStateValues: DocumentReadyState[] = [
+  'loading',
+  'interactive',
+  'complete',
+];
+
 /**
  * Run a callback when the document.readyState has a certain value
- * @param {string|string[]} state - the state(s) when to run the callback
+ * @param {DocumentReadyState | DocumentReadyState[]} state - the state(s) when to run the callback
  * @param {Function} callback - the callback to run
  */
-export const onReadyState = (state: string | string[], callback: Function): void => {
-  const validStates = Array.isArray(state) ? state : [state];
+export const onReadyState = (
+  state: DocumentReadyState | DocumentReadyState[],
+  callback: Function
+): void => {
+  const validStates = (Array.isArray(state) ? state : [state]).filter(state =>
+    documentReadyStateValues.includes(state)
+  );
   const checkAndRun = () => {
-    if (validStates.includes(document.readyState)) {
+    const minValidStateIndex = validStates.reduce(
+      (minIndex, state) => Math.min(minIndex, documentReadyStateValues.indexOf(state)),
+      Infinity
+    );
+
+    if (
+      validStates.includes(document.readyState) ||
+      documentReadyStateValues.indexOf(document.readyState) > minValidStateIndex
+    ) {
       document.removeEventListener('readystatechange', checkAndRun);
       callback();
       return true;
@@ -26,7 +45,7 @@ export const onReadyState = (state: string | string[], callback: Function): void
  * @param {Function} callback - the callback to run
  */
 export const onComplete = (callback: Function): void =>
-  onReadyState(['complete', 'loaded'], callback);
+  onReadyState('complete', callback);
 
 /**
  * Run a callback when the document.readyState is 'interactive'

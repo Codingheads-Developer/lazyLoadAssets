@@ -21,7 +21,7 @@ export default class animate {
     requestAnimationFrame(() => {
       target.dataset.animationLoaded = 'true';
       const toAdd = target.dataset.animate;
-      if (toAdd.length) {
+      if (toAdd?.length) {
         target.classList.add(toAdd);
       }
       target.dispatchEvent(
@@ -39,22 +39,22 @@ export default class animate {
     const elements = container.querySelectorAll(
       `[data-animate]:not([data-animate-init])`
     );
-    if (elements.length) {
-      ([...elements] as HTMLElement[]).forEach(element => {
-        const options =
-          'rootMargin' in element.dataset
-            ? { rootMargin: element.dataset.rootMargin }
-            : {};
-        new activateOnScroll(element, {
-          initAttribute: 'animateInit',
-          options: {
-            ...this.observerOptions,
-            ...options,
-          },
-          callback: this.initializeElement,
-        });
-      });
+    if (!elements.length) {
+      return;
     }
+
+    ([...elements] as HTMLElement[]).forEach(element => {
+      const options =
+        'rootMargin' in element.dataset ? { rootMargin: element.dataset.rootMargin } : {};
+      new activateOnScroll(element, {
+        initAttribute: 'animateInit',
+        options: {
+          ...this.observerOptions,
+          ...options,
+        },
+        callback: this.initializeElement,
+      });
+    });
   }
 
   // the cleaner, to be used in lazyLoadAssets

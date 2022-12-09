@@ -1,6 +1,6 @@
 # Lazy-loaded Assets
 
-This library contains some JavaScript plugins to allow lazy-loading images, scripts, stylesheets, iframes and more. The lazy-load functionality also works with Foundation Interchange, and with pictures tags.
+This library contains some JavaScript plugins to allow lazy-loading images, scripts, stylesheets, iframes and more. The lazy-load functionality also works with pictures tags.
 
 ## Initializing in JavaScript
 
@@ -8,7 +8,8 @@ To initialize the library, you need to create a new instance of the `lazyLoadAss
 
 ```javascript
 new lazyLoadAssets(document.body, {
-  plugins: [...]
+  plugins: [...],
+  imagesLoaded: imagesLoaded, // optional
 })
 ```
 
@@ -26,6 +27,7 @@ import {
   animate,
   onInteractive,
 } from '@codingheads/lazyload';
+import imagesLoaded from 'imagesloaded';
 
 onInteractive(() => {
   new lazyLoadAssets(document.body, {
@@ -38,9 +40,19 @@ onInteractive(() => {
       lazyStyles,
       animate,
     ],
+    imagesLoaded,
   });
 });
 ```
+
+**Starting with version 2.0, if you want to use ImagesLoaded, you must pass it to the lazyLoadAssets constructor.**
+
+## Changelog
+
+v2.0
+
+- Removed support for Foundation Interchange (use Picture instead)
+- Removed imagesloaded by default; you can still add it if needed.
 
 ## Plugins
 
@@ -65,9 +77,6 @@ onInteractive(() => {
 
    ```html
    <img data-lazy-img data-src="https://test.image" alt="" />
-
-   <!-- interchange -->
-   <img data-lazy-interchange="[https://test.image, small]" />
    ```
 
 2. `lazyCssBg`

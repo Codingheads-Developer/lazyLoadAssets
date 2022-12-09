@@ -1,5 +1,4 @@
 import activateOnScroll from './activateOnScroll';
-import imagesLoaded from 'imagesloaded';
 
 /**
  * lazyCssBg
@@ -14,9 +13,11 @@ export default class lazyCssBg {
    */
   static observerOptions: IntersectionObserverInit = {};
 
+  static imagesLoaded: ImagesLoaded.ImagesLoadedConstructor | null = null;
+
   static initializeElement = (target: HTMLElement) => {
     window.requestAnimationFrame(() => {
-      imagesLoaded(target, { background: true }, function () {
+      lazyCssBg.imagesLoaded?.(target, { background: true }, function () {
         requestAnimationFrame(() => {
           target.dataset.cssBgLoaded = 'true';
           target.dispatchEvent(

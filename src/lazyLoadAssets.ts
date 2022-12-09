@@ -14,30 +14,37 @@ import activateOnScroll from './activateOnScroll';
 export default class lazyLoadAssets {
   #container: HTMLElement;
   #useMutationObserver: boolean;
-  #observer: MutationObserver = null;
+  #observer: MutationObserver | null = null;
   #plugins: Array<any>;
+  #imagesLoaded: ImagesLoaded.ImagesLoadedConstructor | null = null;
 
   constructor(
     container: HTMLElement = document.body,
     {
       useMutationObserver = true,
       init = true,
+      imagesLoaded = null,
       plugins = [activateOnScroll],
     }: {
       useMutationObserver?: boolean;
       init?: boolean;
       plugins?: Array<any>;
+      imagesLoaded?: ImagesLoaded.ImagesLoadedConstructor;
     } = {}
   ) {
     // save the settings
     this.#container = container;
     this.#useMutationObserver = useMutationObserver;
     this.#plugins = plugins;
+    this.#imagesLoaded = imagesLoaded;
     if (init) this.init();
   }
 
   activate() {
-    this.#plugins.forEach(plugin => plugin.initializer(this.#container));
+    this.#plugins.forEach(plugin => {
+      plugin.imagesLoaded = this.#imagesLoaded;
+      plugin.initializer(this.#container);
+    });
   }
 
   debouncedActivate = debounce(() => this.activate(), 100);
@@ -57,11 +64,10 @@ export default class lazyLoadAssets {
         const addedNodes = mutationList.reduce(
           (added, mutation) => [
             ...added,
-            ...[].filter.call(
-              mutation.addedNodes,
+            Array.from(mutation.addedNodes).filter(
               node =>
                 node.nodeType == Node.ELEMENT_NODE &&
-                !['SCRIPT', 'LINK'].includes(node.tagName)
+                !['SCRIPT', 'LINK'].includes((node as HTMLElement).tagName)
             ),
           ],
           []
