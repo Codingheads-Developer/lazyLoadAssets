@@ -31,6 +31,7 @@ export default class activateOnScroll {
    * default options for the Intersection observer
    */
   static observerOptions: IntersectionObserverInit = {
+    threshold: 0.01,
     rootMargin: '300px 100px',
   };
 
@@ -353,7 +354,7 @@ export default class activateOnScroll {
       };
       observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
-          if (entry.isIntersecting && entry.intersectionRatio > 0) {
+          if (entry.isIntersecting) {
             // allow cancelling the event
             if (!dispatchTargetEvent(entry, 'willActivateOnScroll', observer)) return;
 
